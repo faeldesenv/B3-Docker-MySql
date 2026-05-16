@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Api calculo CDB",
         Version = "v1",
-        Description = "API para cálculo de rendimento de investimentos em CDB."
+        Description = "API para cï¿½lculo de rendimento de investimentos em CDB."
     });
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -44,8 +44,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // Adicione esta linha se não tiver
-app.UseRouting();     // Adicione esta linha se não tiver
+app.UseStaticFiles(); // Adicione esta linha se nï¿½o tiver
+app.UseRouting();     // Adicione esta linha se nï¿½o tiver
 app.UseCors("AllowAngular");
 app.UseAuthorization();
 
