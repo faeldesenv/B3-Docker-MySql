@@ -1,5 +1,7 @@
-﻿using CalculadoraCdb.Api.Interface;
+using CalculadoraCdb.Api.Entities;
+using CalculadoraCdb.Api.Interface;
 using CalculadoraCdb.Api.Model;
+using CalculadoraCdb.Api.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CalculadoraCdb.Api.Controllers
@@ -10,14 +12,17 @@ namespace CalculadoraCdb.Api.Controllers
     public class CdbController : ControllerBase
     {
         private readonly ICalculadoraCdbService _calculadoraCdbService;
+        private readonly ICalculoCdbRepository _repository;
 
         /// <summary>
         /// Initializes a new instance of <see cref="CdbController"/>.
         /// </summary>
-        /// <param name="calculatorService">The CDB calculation service.</param>
-        public CdbController(ICalculadoraCdbService calculadoraCdbService)
+        /// <param name="calculadoraCdbService">The CDB calculation service.</param>
+        /// <param name="repository">The CDB calculation repository.</param>
+        public CdbController(ICalculadoraCdbService calculadoraCdbService, ICalculoCdbRepository repository)
         {
             _calculadoraCdbService = calculadoraCdbService;
+            _repository = repository;
         }
 
         /// <summary>
@@ -26,9 +31,9 @@ namespace CalculadoraCdb.Api.Controllers
         /// <param name="request">The calculation request with initial value and period.</param>
         /// <returns>Gross and net values of the investment.</returns>
         [HttpPost("calculate")]
-        [ProducesResponseType(typeof(CalculaCdbRequest), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CalculaCdbResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Calculate([FromBody] CalculaCdbRequest request)
+        public async Task<IActionResult> Calculate([FromBody] CalculaCdbRequest request)
         {
             if (request.ValorInvestido <= 0)
             {
@@ -43,6 +48,16 @@ namespace CalculadoraCdb.Api.Controllers
             }
 
             var result = _calculadoraCdbService.Calculate(request.ValorInvestido, request.Meses);
+
+            await _repository.SaveAsync(new CalculoCdb
+            {
+                ValorInvestido = request.ValorInvestido!.Value,
+                Meses = request.Meses!.Value,
+                ValorBruto = result.ValorBruto,
+                ValorLiquido = result.ValorLiquido,
+                DataCalculo = DateTime.UtcNow
+            });
+
             return Ok(result);
         }
     }
